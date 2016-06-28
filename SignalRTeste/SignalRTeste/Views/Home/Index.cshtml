@@ -1,0 +1,100 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Chat SignalR</title>
+    <link type="text/css" rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+</head>
+<body>
+    <div class="container">
+        <h2>Index</h2>
+
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="list-group">
+                    
+                </div>
+            </div>
+        </div>
+        <div>
+            <form>
+                <div class="input-group">
+                    <input type="text" class="form-control" name="msg" placeholder="Digite sua mensagem" required autofocus />
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="submit">Enviar!</button>
+                    </span>
+                </div><!-- /input-group -->
+            </form>
+        </div>
+
+    </div>
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script type="text/javascript">
+
+        $(function () {
+
+            var app = $.connection.myHub1;
+
+            var connectionId = '';
+
+            app.client.hello = function (conexao) {
+                connectionId = conexao;
+                console.log(connectionId);
+            };
+
+            //var teste = {
+
+            //    RetornaConexao: function(){
+            //        console.log(connectionId);
+            //    }
+            //}
+            //teste
+
+            app.client.receber = function (data) {
+
+                var html = '';
+                console.log(data.Conexao);
+                if (data.Conexao == connectionId) {
+
+                    html = '<div class="list-group-item text-right">'+
+                        '<div class="row">'+
+                            '<div class="col-md-12"><b class="text-primary">Você diz:</b> ' + data.Mensagem + '</div>' +
+                            '<div class="col-md-12">Data: ' + data.Hora + '</div>'+
+                        '</div>'+
+                    '</div>';
+                }
+                else {
+                    html = '<div class="list-group-item">' +
+                        '<div class="row">' +
+                            '<div class="col-md-12"><b>Fulano diz:</b> ' + data.Mensagem + '</div>' +
+                            '<div class="col-md-12">Data: ' + data.Hora + '</div>' +
+                        '</div>' +
+                    '</div>';
+                }
+
+
+                $('.list-group').append(html);
+            };
+
+            $.connection.hub.start().done(function () {
+                app.server.conectar();
+                //alert('Conexão Iniciada!');
+            });
+
+            $('form').submit(function (e) {
+                e.preventDefault();
+                var mensagem = $('input[name=msg]').val();
+                app.server.enviarMensagem(mensagem, connectionId);
+                $('input[name=msg]').val('');
+            });
+
+        });
+
+    </script>
+</body>
+</html>
